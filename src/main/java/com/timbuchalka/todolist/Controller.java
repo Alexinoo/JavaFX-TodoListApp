@@ -1,5 +1,6 @@
 package com.timbuchalka.todolist;
 
+import com.timbuchalka.datamodel.TodoData;
 import com.timbuchalka.datamodel.TodoItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -28,6 +29,7 @@ public class Controller {
   private Label deadlineLabel;
 
   public void initialize(){
+    /*
     TodoItem item1 = new TodoItem("Mail birthday card","Buy a 30th birthday card for John",
             LocalDate.of(2024, Month.APRIL,25));
 
@@ -42,13 +44,14 @@ public class Controller {
 
     TodoItem item5 = new TodoItem("Pick Up Dry Cleaning","The clothes should be ready by Wednesday",
               LocalDate.of(2016, Month.APRIL,20));
-
     todoItems = new ArrayList<>();
     todoItems.add(item1);
     todoItems.add(item2);
     todoItems.add(item3);
     todoItems.add(item4);
     todoItems.add(item5);
+    TodoData.getInstance().setTodoItems(todoItems);
+    */
 
     todoListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TodoItem>() {
       @Override
@@ -62,7 +65,8 @@ public class Controller {
       }
     });
 
-    todoListView.getItems().setAll(todoItems);
+    //todoListView.getItems().setAll(todoItems);
+    todoListView.getItems().setAll(TodoData.getInstance().getTodoItems());
     todoListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
     todoListView.getSelectionModel().selectFirst();
