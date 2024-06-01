@@ -4,6 +4,7 @@ import com.timbuchalka.datamodel.TodoData;
 import com.timbuchalka.datamodel.TodoItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class Controller {
   private List<TodoItem> todoItems;
@@ -46,6 +48,11 @@ public class Controller {
 
   @FXML
   private ToggleButton filterToggleButton;
+
+  private FilteredList<TodoItem> filteredList;
+
+  private Predicate<TodoItem> wantAllItems;
+  private Predicate<TodoItem> wantTodaysItems;
 
   public void initialize(){
     /*
@@ -97,7 +104,22 @@ public class Controller {
 
     //todoListView.getItems().setAll(todoItems);
     //todoListView.getItems().setAll(TodoData.getInstance().getTodoItems());
-    SortedList<TodoItem> sortedList = new SortedList<>(TodoData.getInstance().getTodoItems(),new Comparator<TodoItem>() {
+
+    wantAllItems = new Predicate<TodoItem>() {
+      @Override
+      public boolean test(TodoItem todoItem) {
+        return true;
+      }
+    };
+
+    wantTodaysItems = new Predicate<TodoItem>() {
+      @Override
+      public boolean test(TodoItem todoItem) {
+        return (todoItem.getDeadline().equals(LocalDate.now()));
+      }
+    };
+    filteredList = new FilteredList<>(TodoData.getInstance().getTodoItems(), wantAllItems);
+    SortedList<TodoItem> sortedList = new SortedList<>(filteredList,new Comparator<TodoItem>() {
       @Override
       public int compare(TodoItem o1, TodoItem o2) {
         return o1.getDeadline().compareTo(o2.getDeadline());
@@ -213,10 +235,20 @@ public class Controller {
   }
 
   public void handleFilterButton(){
+    TodoItem selectedItem = todoListView.getSelectionModel().getSelectedItem();
     if (filterToggleButton.isSelected()){
-
+      filteredList.setPredicate(wantTodaysItems);
+      if (filteredList.isEmpty()){
+        itemDetailsTextArea.clear();
+        deadlineLabel.setText("");
+      } else if (filteredList.contains(selectedItem)) {
+        todoListView.getSelectionModel().select(selectedItem);
+      }else {
+        todoListView.getSelectionModel().selectFirst();
+      }
     }else{
-
+      filteredList.setPredicate(wantAllItems);
+      todoListView.getSelectionModel().select(selectedItem);
     }
   }
 }
